@@ -247,11 +247,14 @@ function initMap(){
   const mapRef = ref(db,"sharedMap");
   const dotsRef = ref(db,"dots");
 
+  // načtení mapy z Firebase
   onValue(mapRef, snap=>{
     const url = snap.val();
     if(url) mapBox.innerHTML = `<img src="${url}" alt="Mapa">`;
+    else mapBox.innerHTML = "Klikni pro přidání puntíku";
   });
 
+  // nahrání mapy
   mapInput.addEventListener("change", e=>{
     if(!currentUser) return alert("Přihlaš se pro nahrání mapy!");
     const file = e.target.files[0];
@@ -261,6 +264,7 @@ function initMap(){
     reader.readAsDataURL(file);
   });
 
+  // klik na mapu -> jen uložíme do Firebase, **neduplikuje se DOM**
   mapBox.addEventListener("click", e=>{
     if(!currentUser) return alert("Přihlaš se!");
     const rect = mapBox.getBoundingClientRect();
@@ -270,9 +274,11 @@ function initMap(){
     set(dotRef,{x,y,author:currentUser});
   });
 
+  // vykreslení teček z Firebase
   onValue(dotsRef, snap=>{
     mapBox.querySelectorAll(".dot").forEach(d=>d.remove());
-    logList.innerHTML="";
+    logList.innerHTML = "";
+
     snap.forEach(child=>{
       const d = child.val();
       const dotEl = document.createElement("div");
@@ -285,7 +291,8 @@ function initMap(){
       li.textContent = `${d.author} (${(d.x*100).toFixed(1)}%, ${(d.y*100).toFixed(1)}%)`;
       logList.appendChild(li);
 
-      dotEl.addEventListener("click", (ev)=>{
+      // klik na tečku smaže ji
+      dotEl.addEventListener("click", ev=>{
         ev.stopPropagation();
         if(!currentUser) return;
         remove(ref(db,"dots/"+child.key));
@@ -297,11 +304,13 @@ function initMap(){
     });
   });
 
+  // smazat všechny tečky
   clearBtn.addEventListener("click", ()=>{
     if(!currentUser) return;
     if(confirm("Opravdu smazat všechny puntíky?")) remove(dotsRef);
   });
 }
+
 
 const logoutBtn = document.getElementById("logoutBtn");
 logoutBtn.addEventListener("click", () => {
