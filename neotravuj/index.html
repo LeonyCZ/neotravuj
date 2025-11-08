@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Metin — Sdílený Úkolníček</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="wrap" id="loginWrap">
+    <header><h1>Přihlaš se</h1></header>
+    <main>
+      <input type="email" id="username" placeholder="Email">
+      <input type="password" id="password" placeholder="Heslo">
+      <button class="btn" id="loginBtn">Přihlásit</button>
+    </main>
+  </div>
+
+  <!-- CELÝ ZBYTEK STRÁNKY -->
+  <div id="appContent" style="display:none;">
+<button id="logoutBtn" class="btn" style="background:#ef4444; margin-bottom:10px;">Odhlásit se</button>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="image-box" id="imageBox">Klikni na tlačítko níže pro přidání obrázku</div>
+      <label for="imgInput" class="upload-label">📸 Přidat obrázek</label>
+      <input type="file" id="imgInput" accept="image/*">
+    </div>
+
+    <!-- ÚKOLNÍČKY -->
+    <div class="main" id="taskWrap">
+      <div class="wrap level-wrap" id="level0_75">
+        <header><h2>Level 0-75</h2></header>
+        <main>
+          <div class="new-task">
+            <input type="text" placeholder="Přidat úkol..." class="taskInput">
+            <button class="btn addBtn">Přidat</button>
+          </div>
+          <div class="stats"><span class="total">Úkolů: 0</span> | <span class="done">Splněno: 0</span></div>
+          <ul class="tasks"></ul>
+        </main>
+      </div>
+      <div class="wrap level-wrap" id="level75_90">
+        <header><h2>Level 75-90</h2></header>
+        <main>
+          <div class="new-task">
+            <input type="text" placeholder="Přidat úkol..." class="taskInput">
+            <button class="btn addBtn">Přidat</button>
+          </div>
+          <div class="stats"><span class="total">Úkolů: 0</span> | <span class="done">Splněno: 0</span></div>
+          <ul class="tasks"></ul>
+        </main>
+      </div>
+      <div class="wrap level-wrap" id="level90_105">
+        <header><h2>Level 90-105</h2></header>
+        <main>
+          <div class="new-task">
+            <input type="text" placeholder="Přidat úkol..." class="taskInput">
+            <button class="btn addBtn">Přidat</button>
+          </div>
+          <div class="stats"><span class="total">Úkolů: 0</span> | <span class="done">Splněno: 0</span></div>
+          <ul class="tasks"></ul>
+        </main>
+      </div>
+      <div class="wrap level-wrap" id="level105_120">
+        <header><h2>Level 105-120</h2></header>
+        <main>
+          <div class="new-task">
+            <input type="text" placeholder="Přidat úkol..." class="taskInput">
+            <button class="btn addBtn">Přidat</button>
+          </div>
+          <div class="stats"><span class="total">Úkolů: 0</span> | <span class="done">Splněno: 0</span></div>
+          <ul class="tasks"></ul>
+        </main>
+      </div>
+    </div>
+
+    <!-- MAPA -->
+    <div class="wrap" id="mapWrap">
+      <header>
+        <h2>Mapa</h2>
+        <button class="btn" id="clearDotsBtn">Smazat všechny puntíky</button>
+      </header>
+      <main>
+        <div id="mapBox">Klikni pro přidání puntíku</div>
+        <ul id="dotLog"></ul>
+        <label for="mapInput" class="upload-label">🌄 Nahraj mapu</label>
+        <input type="file" id="mapInput" accept="image/*">
+      </main>
+    </div>
+  </div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js";
+import { getDatabase, ref, push, set, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyAcxIUrzYhARbZGNuPR7HuuG-UFMjltr0w",
+  authDomain: "origi-a3b35.firebaseapp.com",
+  projectId: "origi-a3b35",
+  storageBucket: "origi-a3b35.firebasestorage.app",
+  messagingSenderId: "626317721697",
+  appId: "1:626317721697:web:1929b661333b92fec4aa20",
+  measurementId: "G-SPM3CRWNYC",
+  databaseURL: "https://origi-a3b35-default-rtdb.europe-west1.firebasedatabase.app"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getDatabase(app);
+const auth = getAuth(app);
+let currentUser = "";
+
+// ===== LOGIN =====
+const loginBtn = document.getElementById("loginBtn");
+loginBtn.addEventListener("click", () => {
+  const email = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  if(!email || !password) return alert("Vyplň email i heslo!");
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then(userCredential => {
+      currentUser = userCredential.user.email;
+      document.getElementById("loginWrap").style.display = "none";
+      document.getElementById("appContent").style.display = "flex";
+      initLevelSections();
+      initMap();
+    })
+    .catch(error => alert("Chyba při přihlášení: " + error.message));
+});
+
+// Automatické přihlášení
+onAuthStateChanged(auth, user => {
+  if(user){
+    currentUser = user.email;
+    document.getElementById("loginWrap").style.display = "none";
+    document.getElementById("appContent").style.display = "flex";
+    initLevelSections();
+    initMap();
+    initSharedImage(); // ← přidáno
+  }
+});
+
+
+// ===== Obrázek =====
+function initSharedImage() {
+  const imgInput = document.getElementById("imgInput");
+  const imageBox = document.getElementById("imageBox");
+  const imgRef = ref(db, "sharedImage");
+
+  // Načítání obrázku
+  onValue(imgRef, snap => {
+    const dataUrl = snap.val();
+    if(dataUrl) imageBox.innerHTML = `<img src="${dataUrl}" alt="Sdílený obrázek">`;
+    else imageBox.textContent = "Klikni na tlačítko níže pro přidání obrázku";
+  });
+
+  // Nahrávání obrázku
+  imgInput.addEventListener("change", e => {
+    if(!currentUser) return alert("Přihlaš se pro nahrání obrázku!");
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => set(imgRef, ev.target.result);
+    reader.readAsDataURL(file);
+  });
+}
+
+
+// ===== Úkolníček =====
+function initLevelSections(){
+  const levels = ["level0_75","level75_90","level90_105","level105_120"];
+  levels.forEach(lvl=>{
+    const section=document.getElementById(lvl);
+    const input=section.querySelector(".taskInput");
+    const btn=section.querySelector(".addBtn");
+    const list=section.querySelector(".tasks");
+    const totalEl=section.querySelector(".total");
+    const doneEl=section.querySelector(".done");
+
+    btn.addEventListener("click",()=>{
+      if(!currentUser) return alert("Přihlaš se pro přidání úkolu!");
+      const title=input.value.trim();
+      if(!title) return;
+      const taskRef = push(ref(db,"tasks"));
+      set(taskRef,{title,level:lvl,author:currentUser});
+      input.value="";
+    });
+
+    onValue(ref(db,"tasks"), snapshot=>{
+      list.innerHTML="";
+      let total=0, doneCount=0;
+      snapshot.forEach(child=>{
+        const task = child.val();
+        if(task.level!==lvl) return;
+        const li=document.createElement("li");
+        const userDone = task.doneUsers||{};
+        const safeUser = currentUser.replace(/\./g,"_");
+        const isDone = userDone[safeUser]||false;
+        const doneUsersList = Object.keys(userDone).map(u=>u.replace(/_/g,"."));
+        const doneCountNum = doneUsersList.length;
+
+        li.className = "task" + (isDone?" done":"");
+        li.innerHTML = `<div style="display:flex;gap:10px;align-items:center;">
+          <div class="chk ${isDone?"checked":""}">${isDone?"✓":""}</div>
+          <div class="title">${task.title}<br><small>Autor: ${task.author}</small></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="done-badge tooltip-container">${doneCountNum}<span class="tooltip">${doneCountNum>0?doneUsersList.join(', '):'Nikdo zatím ne'}</span></div>
+          <button class="del-btn">✖</button>
+        </div>`;
+
+        li.querySelector(".chk").addEventListener("click", () => {
+          if(!currentUser) return;
+          const userDoneRef = ref(db, `tasks/${child.key}/doneUsers/${safeUser}`);
+          get(userDoneRef).then(snapshot => {
+            if(snapshot.exists()) remove(userDoneRef);
+            else set(userDoneRef, true);
+          }).catch(err => console.error("Chyba při odfajfkování:", err));
+        });
+
+        li.querySelector(".del-btn").addEventListener("click", ()=> {
+          if(!currentUser) return;
+          remove(ref(db,"tasks/"+child.key));
+        });
+        list.appendChild(li);
+        total++; doneCount+=doneCountNum;
+      });
+      totalEl.textContent="Úkolů: "+total;
+      doneEl.textContent="Splněno: "+doneCount;
+    });
+  });
+}
+
+// ===== Mapa =====
+function initMap(){
+  const mapBox = document.getElementById("mapBox");
+  const mapInput = document.getElementById("mapInput");
+  const clearBtn = document.getElementById("clearDotsBtn");
+  const logList = document.getElementById("dotLog");
+
+  const mapRef = ref(db,"sharedMap");
+  const dotsRef = ref(db,"dots");
+
+  onValue(mapRef, snap=>{
+    const url = snap.val();
+    if(url) mapBox.innerHTML = `<img src="${url}" alt="Mapa">`;
+  });
+
+  mapInput.addEventListener("change", e=>{
+    if(!currentUser) return alert("Přihlaš se pro nahrání mapy!");
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => set(mapRef, ev.target.result);
+    reader.readAsDataURL(file);
+  });
+
+  mapBox.addEventListener("click", e=>{
+    if(!currentUser) return alert("Přihlaš se!");
+    const rect = mapBox.getBoundingClientRect();
+    const x = ((e.clientX-rect.left)/rect.width).toFixed(3);
+    const y = ((e.clientY-rect.top)/rect.height).toFixed(3);
+    const dotRef = push(dotsRef);
+    set(dotRef,{x,y,author:currentUser});
+  });
+
+  onValue(dotsRef, snap=>{
+    mapBox.querySelectorAll(".dot").forEach(d=>d.remove());
+    logList.innerHTML="";
+    snap.forEach(child=>{
+      const d = child.val();
+      const dotEl = document.createElement("div");
+      dotEl.className="dot";
+      dotEl.style.left=(d.x*100)+"%";
+      dotEl.style.top=(d.y*100)+"%";
+      mapBox.appendChild(dotEl);
+
+      const li = document.createElement("li");
+      li.textContent = `${d.author} (${(d.x*100).toFixed(1)}%, ${(d.y*100).toFixed(1)}%)`;
+      logList.appendChild(li);
+
+      dotEl.addEventListener("click", (ev)=>{
+        ev.stopPropagation();
+        if(!currentUser) return;
+        remove(ref(db,"dots/"+child.key));
+      });
+      li.addEventListener("click", ()=>{
+        if(!currentUser) return;
+        remove(ref(db,"dots/"+child.key));
+      });
+    });
+  });
+
+  clearBtn.addEventListener("click", ()=>{
+    if(!currentUser) return;
+    if(confirm("Opravdu smazat všechny puntíky?")) remove(dotsRef);
+  });
+}
+
+const logoutBtn = document.getElementById("logoutBtn");
+logoutBtn.addEventListener("click", () => {
+  signOut(auth).then(() => {
+    currentUser = "";
+    document.getElementById("appContent").style.display = "none";
+    document.getElementById("loginWrap").style.display = "flex";
+    // Pokud chceš úplně čistou stránku, můžeš odkomentovat:
+    // location.reload();
+  }).catch(err => console.error("Chyba při odhlášení:", err));
+});
+
+</script>
+</body>
+</html>
