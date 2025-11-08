@@ -56,26 +56,31 @@ body{
   font-weight:600;
 }
 
-/* CELÝ OBSAH po přihlášení */
 #appContent {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding:40px;
-  gap:30px;
+  padding: 40px;
+  gap: 30px;
+  margin-left: 500px;  /* šířka sidebaru + mezera */
+  margin-right: 500px; /* šířka mapy + mezera */
 }
 
-/* SIDEBAR */
+
 .sidebar {
-  width:450px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:15px;
+  width: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  position: fixed;   /* přidáno */
+  top: 40px;         /* odsazení od vrchu */
+  left: 40px;        /* odsazení od levého okraje */
 }
 .image-box {
   width:450px;
   height:450px;
+  margin-top: 60px;
   background:#2e323c;
   border:2px dashed #555;
   border-radius:16px;
@@ -240,7 +245,12 @@ li.task.done{background:#24403b;}
 }
 #clearDotsBtn:hover { background: #f87171; transform: scale(1.05); box-shadow:0 6px 16px rgba(239,68,68,0.5); }
 
-#mapWrap { width: 450px; }
+#mapWrap {
+  width: 450px;
+  position: fixed;  /* přidáno */
+  top: 40px;        /* odsazení od vrchu */
+  right: 40px;      /* odsazení od pravého okraje */
+}
 #mapBox {
   width: 100%;
   height: 450px;
@@ -272,12 +282,21 @@ li.task.done{background:#24403b;}
 }
 #dotLog li { cursor:pointer; margin-bottom:4px; }
 #logoutBtn {
-  color:white;
-  border:none;
-  padding:10px 14px;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:600;
+  position: fixed;  
+  top: 20px;        
+  left: 40px;       
+  z-index: 1000;     /* výrazně vyšší než obrázek */
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  background: var(--accent-grad);  /* přidat pozadí, aby nebylo průhledné */
   transition: all 0.2s ease;
 }
-#logoutBtn:hover { background:#f87171; transform: scale(1.05); }
+#logoutBtn:hover {
+  background: #f87171;
+  transform: scale(1.05);
+}
+
