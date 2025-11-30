@@ -72,10 +72,10 @@ const ITEMS = [
   { key: "hedvabi_hada", name: "Hedvábí hada", count: 3 },
   { key: "duse_zeme", name: "Duše Země", count: 1 }
 ];
-
 function initCalculator(){
   const tbody = document.querySelector("#calcTable tbody");
   const grandTotalEl = document.getElementById("grandTotal");
+  const lastUpdateEl = document.getElementById("lastUpdate"); // element pro timestamp
   const pricesRef = ref(db, "prices");
 
   tbody.innerHTML = "";
@@ -100,7 +100,17 @@ function initCalculator(){
         const raw = input.value.trim().replace(",", ".");
         const val = parseFloat(raw);
         if(Number.isFinite(val) && val >= 0){
-          set(ref(db, `prices/${item.key}`), val).catch(err => console.error("Chyba při ukládání ceny:", err));
+          // uloží cenu a zároveň aktualizuje timestamp
+          const now = new Date();
+          const timestamp = now.toLocaleString('cs-CZ', { dateStyle:'short', timeStyle:'short' });
+          
+          // aktualizace ceny a timestampu v jedné operaci
+          set(ref(db, `prices/${item.key}`), val)
+            .then(() => set(ref(db, "prices/lastUpdate"), timestamp))
+            .then(() => {
+              if(lastUpdateEl) lastUpdateEl.textContent = "Naposledy aktualizováno: " + timestamp;
+            })
+            .catch(err => console.error("Chyba při ukládání ceny nebo timestampu:", err));
         } else alert("Zadej platnou cenu!");
       }
     });
@@ -120,9 +130,13 @@ function initCalculator(){
       grand += total;
     });
     grandTotalEl.textContent = formatNumber(grand);
+
+    // Zobrazení poslední aktualizace z Firebase
+    if(lastUpdateEl && data.lastUpdate) lastUpdateEl.textContent = "Naposledy aktualizováno: " + data.lastUpdate;
   });
 }
 
+// Pomocná funkce pro formátování čísel
 function formatNumber(n){
   if(typeof n !== "number") n = Number(n) || 0;
   return n.toLocaleString('cs-CZ', { maximumFractionDigits: 2, minimumFractionDigits: (n % 1 === 0 ? 0 : 2) });

@@ -23,10 +23,11 @@
     <button id="logoutBtn" class="btn" style="background:#ef4444; margin-bottom:10px;">Odhlásit se</button>
 
     <!-- SIDEBAR (nyní kalkulátor) -->
-    <div class="sidebar">
+<div class="sidebar">
   <div class="calc-box" id="calcBox">
     <header>
-      <h2>Kalkulátor</h2>
+      <h2 style="margin:0;">Kalkulátor</h2>
+      <div id="lastUpdate">Naposledy aktualizováno: -</div>
     </header>
     <main>
       <!-- scrollovatelná oblast pouze pro tabulku -->
@@ -49,11 +50,15 @@
       <!-- footer s celkem a instrukcemi -->
       <div class="calc-footer">
         <div>Celkem: <span id="grandTotal">0</span> Yang</div>
-        <div class="muted">Do pole napiš cenu za kus a stiskni Enter (cena se uloží a automaticky přepočítá). Položky jsou včetně překovu z itemu LVL 105 na 120 LVL.</div>
+        <div class="muted">
+          Do pole napiš cenu za kus a stiskni Enter (cena se uloží a automaticky přepočítá). 
+          Položky jsou včetně překovu z itemu LVL 105 na 120 LVL.
+        </div>
       </div>
     </main>
   </div>
 </div>
+
     <!-- ÚKOLNÍČKY -->
     <div class="main" id="taskWrap">
       <div class="wrap level-wrap" id="level0_75">

@@ -89,12 +89,6 @@ body{
   overflow: hidden; /* footer zůstane mimo scroll */
 }
 
-.calc-box header {
-  padding: 16px;
-  border-bottom: 1px solid #3b3f47;
-  flex-shrink: 0; /* header fixní výška */
-}
-
 .calc-box main {
   flex: 1 1 auto;           /* hlavní obsah zabírá zbytek prostoru */
   display: flex;
@@ -376,3 +370,31 @@ li.task.done{background:#24403b;}
   background: #f87171;
   transform: scale(1.05);
 }
+.calc-box header {
+  display: flex;
+  justify-content: space-between; /* nadpis vlevo, timestamp vpravo */
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #3b3f47;
+}
+
+.calc-box header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: white;
+}
+
+#lastUpdate {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #7c3aed, #06b6d4);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  white-space: nowrap;       /* nerozlomit text */
+  display: inline-block;     /* TADY JE KLÍČ */
+  margin-left: 10px;
+}
+
+
