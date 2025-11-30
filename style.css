@@ -66,44 +66,119 @@ body{
   margin-right: 500px; /* šířka mapy + mezera */
 }
 
-
+/* SIDEBAR -> Kalkulátor */
 .sidebar {
   width: 450px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 15px;
-  position: fixed;   /* přidáno */
-  top: 40px;         /* odsazení od vrchu */
-  left: 40px;        /* odsazení od levého okraje */
+  position: fixed;
+  top: 60px;
+  left: 40px;
 }
-.image-box {
-  width:450px;
-  height:450px;
-  margin-top: 60px;
-  background:#2e323c;
-  border:2px dashed #555;
-  border-radius:16px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#a0aec0;
-  overflow:hidden;
+/* ===== Kalkulátor upravený ===== */
+.calc-box {
+  width: 450px;
+  height: 850px; /* celková výška boxu */
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 2px solid rgba(255,255,255,0.02);
+  border-radius: 16px;
+  overflow: hidden; /* footer zůstane mimo scroll */
 }
-.image-box img{
+
+.calc-box header {
+  padding: 16px;
+  border-bottom: 1px solid #3b3f47;
+  flex-shrink: 0; /* header fixní výška */
+}
+
+.calc-box main {
+  flex: 1 1 auto;           /* hlavní obsah zabírá zbytek prostoru */
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  overflow: hidden;          /* scroll jen uvnitř table-scroll */
+}
+
+.table-scroll {
+  flex: 1 1 auto;           /* zabírá celý dostupný prostor */
+  overflow-y: auto;         /* scroll se objeví, pokud je obsah vyšší */
+  margin-bottom: 10px;      /* malý prostor nad footerem */
+}
+
+.calc-footer {
+  flex-shrink: 0;           /* footer fixní výška */
+  padding: 8px 16px;        /* menší padding, aby nebyl příliš velký */
+  border-top: 1px solid #3b3f47;
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.calc-footer .muted {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+
+#calcTable {
   width:100%;
-  height:100%;
-  object-fit:cover;
+  border-collapse: collapse;
+  font-size:14px;
 }
-.sidebar input[type=file]{display:none;}
-.upload-label{
-  background:var(--accent-grad);
-  padding:10px 20px;
-  border-radius:10px;
-  color:white;
-  cursor:pointer;
+#calcTable thead th {
+  text-align:left;
+  padding:8px 6px;
+  color:var(--muted);
   font-weight:600;
 }
+#calcTable tbody td {
+  padding:8px 6px;
+  vertical-align: middle;
+}
+.calc-item-row {
+  background:#2b2f38;
+  border-radius:8px;
+}
+.calc-item-row td { padding:8px; }
+.count-badge {
+  display:inline-block;
+  min-width:28px;
+  padding:6px 8px;
+  text-align:center;
+  border-radius:8px;
+  background:#1f2227;
+  border:1px solid #3b3f47;
+  color:var(--muted);
+  font-weight:700;
+}
+.price-input {
+  width:100%;
+  padding:6px 8px;
+  border-radius:8px;
+  background:#1e2128;
+  border:1px solid #3b3f47;
+  color:#f8fafc;
+  font-weight:700;
+}
+.item-total {
+  font-weight:800;
+}
+.calc-footer {
+  margin-top:6px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  align-items:flex-start;
+  border-top:1px solid #3b3f47;
+  padding-top:8px;
+}
+.calc-footer .muted { color:var(--muted); font-size:13px; }
 
 /* HLAVNÍ ÚKOLNÍČEK */
 .main {
@@ -247,9 +322,9 @@ li.task.done{background:#24403b;}
 
 #mapWrap {
   width: 450px;
-  position: fixed;  /* přidáno */
-  top: 40px;        /* odsazení od vrchu */
-  right: 40px;      /* odsazení od pravého okraje */
+  position: fixed;
+  top: 40px;
+  right: 40px;
 }
 #mapBox {
   width: 100%;
@@ -281,22 +356,23 @@ li.task.done{background:#24403b;}
   font-size: 14px;
 }
 #dotLog li { cursor:pointer; margin-bottom:4px; }
+
+/* logout */
 #logoutBtn {
-  position: fixed;  
-  top: 20px;        
-  left: 40px;       
-  z-index: 1000;     /* výrazně vyšší než obrázek */
+  position: fixed;
+  top: 20px;
+  left: 40px;
+  z-index: 1000;
   color: white;
   border: none;
   padding: 10px 14px;
   border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
-  background: var(--accent-grad);  /* přidat pozadí, aby nebylo průhledné */
+  background: var(--accent-grad);
   transition: all 0.2s ease;
 }
 #logoutBtn:hover {
   background: #f87171;
   transform: scale(1.05);
 }
-
