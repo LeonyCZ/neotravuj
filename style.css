@@ -322,7 +322,7 @@ li.task.done{background:#24403b;}
 #mapWrap {
   width: 450px;
   position: fixed;
-  top: 40px;
+  top: 110px;
   right: 40px;
 }
 #mapBox {
@@ -450,5 +450,84 @@ header {
   visibility: visible;
   opacity: 1;
 }
+/* FIXNÍ BOSS BANNER */
+#bossBanner {
+  position: fixed;
+  top: 40px;
+  right: 40px;
+  width: 450px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, #7c3aed, #06b6d4);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  z-index: 9999;
+  font-size: 16px;
+}
 
+/* Oddělená barva názvu bosse */
+#bossBanner #bossName {
+  color: #facc15; /* zlatá barva pro název bosse */
+  font-weight: 800;
+}
 
+/* Tooltip otazník */
+#bossBanner .tooltip-icon {
+  position: relative;
+  top: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #7c3aed, #06b6d4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+}
+
+#bossBanner .tooltip-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Tooltip obsah */
+#bossBanner .boss-tooltip {
+  display: none; /* default skrytý */
+  position: absolute;
+  top: 36px;
+  right: 0;
+  background: rgba(0,0,0,0.95);
+  color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  max-height: 300px;
+  overflow-y: auto; /* scroll */
+  z-index: 10000;
+  width: 250px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+/* Tabulka bossů uvnitř tooltipu */
+#bossTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#bossTable th, #bossTable td {
+  padding: 6px 8px;
+  border: 1px solid #fff;
+  text-align: center;
+}
+
+#bossTable th {
+  background: rgba(255,255,255,0.2);
+}

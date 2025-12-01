@@ -285,3 +285,127 @@ logoutBtn.addEventListener("click", () => {
     document.getElementById("loginWrap").style.display = "flex";
   }).catch(err => console.error("Chyba při odhlášení:", err));
 });
+function initBossBanner() {
+  const bannerEl = document.getElementById("nextBoss");
+  const countdownEl = document.getElementById("bossCountdown");
+  const tableEl = document.getElementById("bossTable");
+  const tooltipIcon = document.querySelector("#bossBanner .tooltip-icon");
+  const bossesRef = ref(db, "bosses");
+
+  const bossConfig = [
+    { name: "Ledová čarodějnice", cooldown: 2 },
+    { name: "Král Wubba", cooldown: 3 },
+    { name: "Vládce En-Tai", cooldown: 4 },
+    { name: "Hadí královna Nethis", cooldown: 6 },
+    { name: "BO: Vládce En-Tai", cooldown: 4 },
+    { name: "ČT: Bagjanamu", cooldown: 4 },
+    { name: "Naga Serpent", cooldown: 6 }
+  ];
+
+  // Generování spawnů od půlnoci
+  function generateSpawns() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const spawns = [];
+    bossConfig.forEach(b => {
+      const times = [];
+      let next = new Date(today);
+      while(next.getDate() === today.getDate()) {
+        times.push(next.getTime());
+        next = new Date(next.getTime() + b.cooldown * 60 * 60 * 1000);
+      }
+      spawns.push({ name: b.name, times });
+    });
+    return spawns;
+  }
+
+  function updateBanner(spawnsData) {
+    const now = Date.now();
+    let nextTime = null;
+    let nextBosses = [];
+
+    // Najdi nejbližší spawn
+    spawnsData.forEach(b => {
+      b.times.forEach(ts => {
+        if(ts > now && (!nextTime || ts < nextTime)) nextTime = ts;
+      });
+    });
+
+    // Najdi všechny bosse se stejným časem
+    spawnsData.forEach(b => {
+      b.times.forEach(ts => {
+        if(ts === nextTime) nextBosses.push(b.name);
+      });
+    });
+
+    // Aktualizace banneru
+    if(nextBosses.length && nextTime){
+      bannerEl.innerHTML = "Nejbližší boss: <span style='color:#FFD700; font-weight:800;'>" 
+                           + nextBosses.join(", ") + "</span>";
+      const diff = nextTime - now;
+      const hours = Math.floor(diff / 1000 / 60 / 60);
+      const minutes = Math.floor((diff / 1000 / 60) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+      countdownEl.textContent = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    } else {
+      bannerEl.innerHTML = "Nejbližší boss: -";
+      countdownEl.textContent = "00:00:00";
+    }
+
+    // Vytvoření seznamu všech nadcházejících spawnů
+    const allSpawns = [];
+    spawnsData.forEach(b => {
+      b.times.forEach(ts => {
+        if(ts > now) allSpawns.push({ name: b.name, time: ts });
+      });
+    });
+
+    // Seřazení podle času
+    allSpawns.sort((a,b) => a.time - b.time);
+
+    // Generování HTML tooltipu
+    let html = "<table><tr><th>Boss</th><th>Spawn</th></tr>";
+    allSpawns.forEach(sp => {
+      const diff = sp.time - now;
+      const h = Math.floor(diff / 1000 / 60 / 60);
+      const m = Math.floor((diff / 1000 / 60) % 60);
+      const s = Math.floor((diff / 1000) % 60);
+      html += `<tr><td>${sp.name}</td><td>${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}</td></tr>`;
+    });
+    html += "</table>";
+    tableEl.innerHTML = html;
+  }
+
+  const spawns = generateSpawns();
+
+  // Uloží spawns do Firebase
+  set(bossesRef, spawns);
+
+  // Realtime update každou sekundu
+  setInterval(() => updateBanner(spawns), 1000);
+
+  // Poslouchání změn z DB pro sdílení mezi hráči
+  onValue(bossesRef, snapshot => {
+    const data = snapshot.val();
+    if(data) updateBanner(data);
+  });
+
+  // Klikací tooltip
+  tooltipIcon.addEventListener("click", e => {
+    e.stopPropagation();
+    if(tableEl.style.display === "block") tableEl.style.display = "none";
+    else tableEl.style.display = "block";
+  });
+
+  // Klikněte mimo tooltip pro zavření
+  document.addEventListener("click", () => {
+    tableEl.style.display = "none";
+  });
+
+  // Zabránit zavření při kliknutí uvnitř tooltipu
+  tableEl.addEventListener("click", e => e.stopPropagation());
+}
+
+// Inicializace
+initBossBanner();
+
