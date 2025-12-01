@@ -467,71 +467,54 @@ header {
   font-size: 16px;
 }
 
-
-/* Oddělená barva názvu bosse */
-#bossBanner #bossName {
-  color: #facc15; /* zlatá barva pro název bosse */
-  font-weight: 800;
+/* Levá část – název bosse */
+.boss-left {
+  overflow: visible;     /* umožní textu se roztáhnout */
+  text-overflow: clip;   /* žádné tečky */
+  white-space: normal;   /* povolí zalamování řádků, pokud je potřeba */
 }
 
-/* Tooltip otazník */
+
+/* Pravá část – čas a otazník nad sebou */
+.boss-right {
+  display: flex;
+  flex-direction: column;  /* čas nahoře, otazník pod ním */
+  align-items: flex-end;
+  gap: 4px;
+}
+
+/* Čas */
+#bossCountdown {
+  flex-shrink: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Otazník */
 #bossBanner .tooltip-icon {
-  position: relative;
-  top: 0;
   width: 28px;
   height: 28px;
   border-radius: 50%;
   background: linear-gradient(90deg, #7c3aed, #06b6d4);
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  font-weight: bold;
-  font-size: 16px;
-  color: white;
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   transition: transform 0.2s;
+  position: relative;
 }
 
+/* Hover efekt */
 #bossBanner .tooltip-icon:hover {
   transform: scale(1.1);
 }
 
-
-.boss-left {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis; /* pokud je moc dlouhý text, bude se zkracovat */
-}
-
-.boss-right {
-  display: flex;
-  align-items: center;
-  gap: 8px; /* mezera mezi countdown a otazníkem */
-}
-
-#bossBanner .tooltip-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: linear-gradient(90deg, #7c3aed, #06b6d4);
-  color: white;
-  font-weight: bold;
-  font-size: 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  transition: transform 0.2s;
-  margin-left: 8px; /* odsazení od countdownu */
-  position: static; /* důležité */
-}
-
-
+/* Tooltip */
 .boss-tooltip {
-  display: none;
   position: absolute;
   top: 36px;
   right: 0;
@@ -545,10 +528,27 @@ header {
   z-index: 10000;
   width: 250px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translateY(-5px);
 }
 
+.boss-tooltip.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
 
-/* Tabulka bossů uvnitř tooltipu */
+/* Název bosse */
+#bossBanner #bossName {
+  color: #facc15;
+  font-weight: 800;
+}
+
+/* Tabulka uvnitř tooltipu */
 #bossTable table {
   width: 100%;
   border-collapse: collapse;
@@ -562,4 +562,25 @@ header {
 
 #bossTable th {
   background: rgba(255,255,255,0.2);
+}
+.bossInfoTooltip {
+    position: fixed !important;
+    background: rgba(0,0,0,0.95);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+
+    /* JISTOTA NAD VŠÍM */
+    z-index: 999999999 !important;
+}
+
+.bossInfoTooltip.show {
+    opacity: 1;
+    transform: translateY(0);
 }

@@ -286,7 +286,7 @@ logoutBtn.addEventListener("click", () => {
   }).catch(err => console.error("Chyba při odhlášení:", err));
 });
 function initBossBanner() {
-  const bannerEl = document.getElementById("nextBoss");
+  const bannerEl = document.querySelector("#bossBanner .boss-left");
   const countdownEl = document.getElementById("bossCountdown");
   const tableEl = document.getElementById("bossTable");
   const tooltipIcon = document.querySelector("#bossBanner .tooltip-icon");
@@ -302,7 +302,79 @@ function initBossBanner() {
     { name: "Naga Serpent", cooldown: 6 }
   ];
 
-  // Generování spawnů od půlnoci
+  const bossInfo = {
+    "Ledová čarodějnice": "Jeskyně vyhnanství, DMG: 100.000,-",
+    "Král Wubba": "Beta Mapa levý horní roh, DMG: XXX",
+    "Vládce En-Tai": "Zakletý les horní pravý roh, DMG: XXX",
+    "Hadí královna Nethis": "Hadí chrám levý spodní roh, DMG: XXX",
+    "BO: Vládce En-Tai": "Zakletý les spodní pravý roh, DMG: XXX",
+    "ČT: Bagjanamu": "Zakletý les vlevo uprostřed, DMG: XXX ",
+    "Naga Serpent": "Hadí chrám pravý horní roh, DMG: XXX"
+  };
+
+  // --- vytvoření globálního tooltipu (pokud ještě neexistuje) ---
+  let tooltipDiv = document.getElementById("bossInfoTooltip");
+  if (!tooltipDiv) {
+    tooltipDiv = document.createElement("div");
+    tooltipDiv.id = "bossInfoTooltip";
+    // základní styly přímo v JS, aby tooltip vždy visel nad vším
+    Object.assign(tooltipDiv.style, {
+      position: "fixed",
+      display: "none",
+      pointerEvents: "none",
+      background: "rgba(0,0,0,0.95)",
+      color: "#fff",
+      padding: "8px 12px",
+      borderRadius: "8px",
+      fontSize: "14px",
+      whiteSpace: "nowrap",
+      zIndex: "999999999",
+      boxShadow: "0 6px 18px rgba(0,0,0,0.5)",
+      transform: "translateY(0)",
+      transition: "opacity 0.12s ease, transform 0.12s ease",
+      opacity: "0"
+    });
+    document.body.appendChild(tooltipDiv);
+  }
+
+  function showTooltipAt(text, clientX, clientY) {
+    tooltipDiv.textContent = text || "";
+    tooltipDiv.style.display = "block";
+    tooltipDiv.style.opacity = "1";
+
+    // umístění s korekcí, aby tooltip nezmizel přes okraj
+    const padding = 12;
+    const left = clientX + 12;
+    const top = clientY + 12;
+    tooltipDiv.style.left = left + "px";
+    tooltipDiv.style.top = top + "px";
+
+    // měření a případné posunutí, aby tooltip zůstal v okně
+    requestAnimationFrame(() => {
+      const rect = tooltipDiv.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      let finalLeft = rect.left;
+      let finalTop = rect.top;
+
+      if (rect.right > vw - padding) finalLeft = Math.max(padding, vw - rect.width - padding);
+      if (rect.bottom > vh - padding) finalTop = Math.max(padding, vh - rect.height - padding);
+
+      tooltipDiv.style.left = finalLeft + "px";
+      tooltipDiv.style.top = finalTop + "px";
+    });
+  }
+
+  function hideTooltip() {
+    tooltipDiv.style.opacity = "0";
+    // necháme malý delay pro plynulost a pak skryjeme display
+    clearTimeout(tooltipDiv._hideTimeout);
+    tooltipDiv._hideTimeout = setTimeout(() => {
+      tooltipDiv.style.display = "none";
+    }, 120);
+  }
+
+  // --- spawn generation ---
   function generateSpawns() {
     const today = new Date();
     today.setHours(0,0,0,0);
@@ -310,7 +382,8 @@ function initBossBanner() {
     bossConfig.forEach(b => {
       const times = [];
       let next = new Date(today);
-      while(next.getDate() === today.getDate()) {
+      const endTime = today.getTime() + 24*60*60*1000;
+      while (next.getTime() <= endTime) {
         times.push(next.getTime());
         next = new Date(next.getTime() + b.cooldown * 60 * 60 * 1000);
       }
@@ -319,90 +392,123 @@ function initBossBanner() {
     return spawns;
   }
 
+  // --- main update function (render banner + attach tooltip handlers) ---
   function updateBanner(spawnsData) {
     const now = Date.now();
-    let nextTime = null;
-    let nextBosses = [];
+    const upcomingBosses = [];
 
-    // Najdi nejbližší spawn
     spawnsData.forEach(b => {
-      b.times.forEach(ts => {
-        if(ts > now && (!nextTime || ts < nextTime)) nextTime = ts;
-      });
+      const nextTimes = b.times.filter(ts => ts > now);
+      if (nextTimes.length > 0) {
+        upcomingBosses.push({ name: b.name, nextTime: Math.min(...nextTimes) });
+      }
     });
 
-    // Najdi všechny bosse se stejným časem
-    spawnsData.forEach(b => {
-      b.times.forEach(ts => {
-        if(ts === nextTime) nextBosses.push(b.name);
-      });
-    });
+    upcomingBosses.sort((a,b) => a.nextTime - b.nextTime);
+    const nextTime = upcomingBosses[0]?.nextTime || null;
+    const nextBosses = upcomingBosses.filter(b => b.nextTime === nextTime).map(b => b.name);
 
-    // Aktualizace banneru
-    if(nextBosses.length && nextTime){
-      bannerEl.innerHTML = "Nejbližší boss: <span style='color:#FFD700; font-weight:800;'>" 
-                           + nextBosses.join(", ") + "</span>";
+    // Vykreslení banneru — vytvoříme <span> pro každý boss (bez nutnosti měnit HTML)
+    if (nextBosses.length && nextTime) {
+      bannerEl.innerHTML = "Nejbližší boss: " + nextBosses.map(name =>
+        `<span class="boss-tooltip-trigger" data-boss="${escapeHtml(name)}" style="cursor:pointer;color:#facc15;font-weight:800;">${escapeHtml(name)}</span>`
+      ).join(", ");
+
       const diff = nextTime - now;
       const hours = Math.floor(diff / 1000 / 60 / 60);
       const minutes = Math.floor((diff / 1000 / 60) % 60);
       const seconds = Math.floor((diff / 1000) % 60);
       countdownEl.textContent = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+
+      // Přidání eventů pro tooltip na nově vykreslené span prvky
+      const triggers = bannerEl.querySelectorAll(".boss-tooltip-trigger");
+      triggers.forEach(span => {
+        // myš pohybuje tooltipem (aktualizujeme pozici), mouseenter zobrazí obsah
+        const onMove = (e) => {
+          const bossName = span.dataset.boss;
+          const info = bossInfo[bossName] || "Žádné informace.";
+          showTooltipAt(info, e.clientX, e.clientY);
+        };
+        const onEnter = (e) => {
+          onMove(e);
+        };
+        const onLeave = () => {
+          hideTooltip();
+        };
+
+        // remove potential duplicates (defensive)
+        span.removeEventListener("mousemove", span._bossMoveHandler);
+        span.removeEventListener("mouseenter", span._bossEnterHandler);
+        span.removeEventListener("mouseleave", span._bossLeaveHandler);
+
+        span._bossMoveHandler = onMove;
+        span._bossEnterHandler = onEnter;
+        span._bossLeaveHandler = onLeave;
+
+        span.addEventListener("mousemove", onMove);
+        span.addEventListener("mouseenter", onEnter);
+        span.addEventListener("mouseleave", onLeave);
+      });
     } else {
       bannerEl.innerHTML = "Nejbližší boss: -";
       countdownEl.textContent = "00:00:00";
     }
 
-    // Vytvoření seznamu všech nadcházejících spawnů
+    // Tooltip tabulka všech spawnů (neměněno)
     const allSpawns = [];
+    const endTime = now + 24*60*60*1000;
     spawnsData.forEach(b => {
       b.times.forEach(ts => {
-        if(ts > now) allSpawns.push({ name: b.name, time: ts });
+        if (ts > now && ts <= endTime) allSpawns.push({ name: b.name, time: ts });
       });
     });
-
-    // Seřazení podle času
     allSpawns.sort((a,b) => a.time - b.time);
 
-    // Generování HTML tooltipu
     let html = "<table><tr><th>Boss</th><th>Spawn</th></tr>";
     allSpawns.forEach(sp => {
       const diff = sp.time - now;
       const h = Math.floor(diff / 1000 / 60 / 60);
       const m = Math.floor((diff / 1000 / 60) % 60);
       const s = Math.floor((diff / 1000) % 60);
-      html += `<tr><td>${sp.name}</td><td>${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}</td></tr>`;
+      html += `<tr><td>${escapeHtml(sp.name)}</td><td>${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}</td></tr>`;
     });
     html += "</table>";
     tableEl.innerHTML = html;
   }
 
-  const spawns = generateSpawns();
+  // --- helpers ---
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 
-  // Uloží spawns do Firebase
+  // Inicializace spawns + uložíme do Firebase (stejně jako předtím)
+  const spawns = generateSpawns();
   set(bossesRef, spawns);
 
-  // Realtime update každou sekundu
-  setInterval(() => updateBanner(spawns), 1000);
+  // Aktualizace každou sekundu
+  const intervalId = setInterval(() => updateBanner(spawns), 1000);
 
-  // Poslouchání změn z DB pro sdílení mezi hráči
+  // Realtime listener (pokud někdo jiný změní, synchronizuje)
   onValue(bossesRef, snapshot => {
     const data = snapshot.val();
-    if(data) updateBanner(data);
+    if (data) updateBanner(data);
   });
 
-  // Klikací tooltip
-  tooltipIcon.addEventListener("click", e => {
-    e.stopPropagation();
-    if(tableEl.style.display === "block") tableEl.style.display = "none";
-    else tableEl.style.display = "block";
-  });
+  // tooltip icon (otevírání tabulky)
+  if (tooltipIcon) {
+    tooltipIcon.addEventListener("click", e => {
+      e.stopPropagation();
+      tableEl.classList.toggle("show");
+    });
+  }
 
-  // Klikněte mimo tooltip pro zavření
-  document.addEventListener("click", () => {
-    tableEl.style.display = "none";
-  });
-
-  // Zabránit zavření při kliknutí uvnitř tooltipu
+  // zavření tooltip tabulky kliknutím mimo
+  document.addEventListener("click", () => tableEl.classList.remove("show"));
   tableEl.addEventListener("click", e => e.stopPropagation());
 }
 
