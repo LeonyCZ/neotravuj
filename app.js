@@ -40,6 +40,7 @@ loginBtn.addEventListener("click", () => {
     .catch(error => alert("Chyba při přihlášení: " + error.message));
 });
 
+
 // Automatické přihlášení
 onAuthStateChanged(auth, user => {
   if(user){
@@ -144,7 +145,7 @@ function formatNumber(n){
 
 // ===== Úkolníček =====
 function initLevelSections(){
-  const levels = ["level0_75","level75_90","level90_105","level105_120"];
+ const levels = ["level0_75","level75_90","level90_105","level105","level120"];
   levels.forEach(lvl=>{
     const section = document.getElementById(lvl);
     const input = section.querySelector(".taskInput");
