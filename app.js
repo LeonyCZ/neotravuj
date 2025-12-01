@@ -309,14 +309,20 @@ function initBossBanner() {
     { name: "Ledová čarodějnice", cooldown: 2 },
     { name: "Král Wubba", cooldown: 3 },
     { name: "Vládce En-Tai", cooldown: 4 },
-    { name: "Hadí královna Nethis", cooldown: 6 }
+    { name: "Hadí královna Nethis", cooldown: 6 },
+    { name: "BO: Vládce En-Tai", cooldown: 4 },
+    { name: "ČT: Bagjanamu", cooldown: 4 },
+    { name: "Naga Serpent", cooldown: 6 }
   ];
 
   const bossInfo = {
     "Ledová čarodějnice": "Jeskyně vyhnanství, DMG: 100.000,-",
     "Král Wubba": "Beta Mapa levý horní roh, DMG: XXX",
     "Vládce En-Tai": "Zakletý les horní pravý roh, DMG: XXX",
-    "Hadí královna Nethis": "Hadí chrám levý spodní roh, DMG: XXX"
+    "Hadí královna Nethis": "Hadí chrám levý spodní roh, DMG: XXX",
+    "BO: Vládce En-Tai": "Zakletý les spodní pravý roh, DMG: XXX",
+    "ČT: Bagjanamu": "Zakletý les vlevo uprostřed, DMG: XXX",
+    "Naga Serpent": "Hadí chrám pravý horní roh, DMG: XXX"
   };
 
   // --- globální tooltip pro hover bossů ---
@@ -386,6 +392,17 @@ function initBossBanner() {
     });
   }
 
+  // --- spočítat kolik bosů se sejde ve stejný čas ---
+  function getBossCounts(spawns) {
+    const counts = {};
+    spawns.forEach(b => {
+      b.times.forEach(ts => {
+        counts[ts] = (counts[ts] || 0) + 1;
+      });
+    });
+    return counts; // {timestamp: number_of_bosses}
+  }
+
   function updateBanner(spawnsData){
     const now = Date.now();
     const upcoming = [];
@@ -445,19 +462,38 @@ function initBossBanner() {
 
     // tabulka spawnů
     let html = "<table><tr><th>Boss</th><th>Spawn</th></tr>";
+    const allSpawns = [];
     spawnsData.forEach(b=>{
       b.times.forEach(ts=>{
         if(ts>now && ts<=now+24*60*60*1000){
-          const diff = ts-now;
-          const h = Math.floor(diff/1000/60/60);
-          const m = Math.floor((diff/1000/60)%60);
-          const s = Math.floor((diff/1000)%60);
-          html += `<tr><td>${b.name}</td><td>${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}</td></tr>`;
+          allSpawns.push({name:b.name, time:ts});
         }
       });
     });
+
+    // seřadit podle času
+    allSpawns.sort((a,b)=>a.time - b.time);
+
+    allSpawns.forEach(sp=>{
+      const diff = sp.time-now;
+      const h = Math.floor(diff/1000/60/60);
+      const m = Math.floor((diff/1000/60)%60);
+      const s = Math.floor((diff/1000)%60);
+      html += `<tr><td>${sp.name}</td><td>${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}</td></tr>`;
+    });
     html += "</table>";
     tableEl.innerHTML = html;
+
+    // vypočítat kdy se sejde nejvíce bossů
+    const counts = getBossCounts(spawnsData);
+    const maxCount = Math.max(...Object.values(counts));
+    const timesMax = Object.keys(counts).filter(k => counts[k] === maxCount)
+      .map(ts => {
+        const d = new Date(+ts);
+        return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+      });
+
+    console.log(`Nejvíce bossů (${maxCount}) se sejde v časech: ${timesMax.join(", ")}`);
   }
 
   const spawns = generateSpawns();
