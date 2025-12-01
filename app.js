@@ -215,25 +215,35 @@ function initMap(){
   const mapInput = document.getElementById("mapInput");
   const clearBtn = document.getElementById("clearDotsBtn");
   const logList = document.getElementById("dotLog");
+  const addMapBtn = document.getElementById("addMapBtn"); // nové tlačítko
 
   const mapRef = ref(db,"sharedMap");
   const dotsRef = ref(db,"dots");
 
+  // Načtení uložené mapy
   onValue(mapRef, snap=>{
     const url = snap.val();
     if(url) mapBox.innerHTML = `<img src="${url}" alt="Mapa">`;
     else mapBox.innerHTML = "Klikni pro přidání puntíku";
   });
 
+  // Kliknutí na tlačítko "Přidat mapu" → otevře file input
+  addMapBtn.addEventListener("click", () => {
+    if(!currentUser) return alert("Přihlaš se pro nahrání mapy!");
+    mapInput.click();
+  });
+
+  // Nahrání nové mapy → uloží do Firebase a nahradí starou
   mapInput.addEventListener("change", e=>{
     if(!currentUser) return alert("Přihlaš se pro nahrání mapy!");
     const file = e.target.files[0];
     if(!file) return;
     const reader = new FileReader();
-    reader.onload = ev => set(mapRef, ev.target.result);
+    reader.onload = ev => set(mapRef, ev.target.result); // uloží dataURL
     reader.readAsDataURL(file);
   });
 
+  // Přidání puntíku kliknutím na mapu
   mapBox.addEventListener("click", e=>{
     if(!currentUser) return alert("Přihlaš se!");
     const rect = mapBox.getBoundingClientRect();
@@ -243,6 +253,7 @@ function initMap(){
     set(dotRef,{x,y,author:currentUser});
   });
 
+  // Zobrazení puntíků z Firebase
   onValue(dotsRef, snap=>{
     mapBox.querySelectorAll(".dot").forEach(d=>d.remove());
     logList.innerHTML = "";
@@ -271,12 +282,12 @@ function initMap(){
     });
   });
 
+  // Smazání všech puntíků
   clearBtn.addEventListener("click", ()=> {
     if(!currentUser) return;
     if(confirm("Opravdu smazat všechny puntíky?")) remove(dotsRef);
   });
 }
-
 const logoutBtn = document.getElementById("logoutBtn");
 logoutBtn.addEventListener("click", () => {
   signOut(auth).then(() => {
