@@ -314,7 +314,7 @@ li.task.done{background:#24403b;}
 #mapWrap {
   width: 450px;
   position: fixed;
-  top: 140px;
+  top: 240px;
   right: 40px;
 }
 #mapBox {
@@ -474,8 +474,7 @@ header {
   right: 40px;
   width: 450px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   padding: 12px 16px;
   background: linear-gradient(90deg, #7c3aed, #06b6d4);
   color: #fff;
@@ -486,31 +485,29 @@ header {
   font-size: 16px;
 }
 
-/* Levá část – název bosse */
-.boss-left {
-  overflow: visible;     /* umožní textu se roztáhnout */
-  text-overflow: clip;   /* žádné tečky */
-  white-space: normal;   /* povolí zalamování řádků, pokud je potřeba */
-}
-
-
-/* Pravá část – čas a otazník nad sebou */
-.boss-right {
+.boss-header {
   display: flex;
-  flex-direction: column;  /* čas nahoře, otazník pod ním */
-  align-items: flex-end;
-  gap: 4px;
+  align-items: center;
+  margin-bottom: 12px;
+  width: 100%;
+  position: relative;
 }
 
-/* Čas */
+.boss-header .boss-title {
+  flex: 0 0 auto;
+}
+
 #bossCountdown {
-  flex-shrink: 0;
+  flex: 1;
+  text-align: center;
   font-size: 18px;
   font-weight: 700;
 }
 
-/* Otazník */
-#bossBanner .tooltip-icon {
+.tooltip-icon {
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -524,16 +521,46 @@ header {
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   transition: transform 0.2s;
-  position: relative;
 }
 
-/* Hover efekt */
-#bossBanner .tooltip-icon:hover {
+.tooltip-icon:hover {
   transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
-/* Tooltip */
-.boss-tooltip {
+.boss-body {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.boss-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  min-width: 120px;
+  min-height: 40px;
+  background: linear-gradient(145deg, #2e323c, #383d47);
+  color: #facc15;
+  font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.3s ease;
+  user-select: none;
+  text-align: center;
+  width: 100%;
+}
+
+.boss-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+  background: linear-gradient(145deg, #3b3f47, #444b55);
+}
+
+.boss-table {
+  display: none;
   position: absolute;
   top: 36px;
   right: 0;
@@ -547,59 +574,8 @@ header {
   z-index: 10000;
   width: 250px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  transform: translateY(-5px);
 }
 
-.boss-tooltip.show {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-
-/* Název bosse */
-#bossBanner #bossName {
-  color: #facc15;
-  font-weight: 800;
-}
-
-/* Tabulka uvnitř tooltipu */
-#bossTable table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-#bossTable th, #bossTable td {
-  padding: 6px 8px;
-  border: 1px solid #fff;
-  text-align: center;
-}
-
-#bossTable th {
-  background: rgba(255,255,255,0.2);
-}
-.bossInfoTooltip {
-    position: fixed !important;
-    background: rgba(0,0,0,0.95);
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    white-space: nowrap;
-    pointer-events: none;
-    opacity: 0;
-    transform: translateY(-5px);
-    transition: opacity 0.15s ease, transform 0.15s ease;
-
-    /* JISTOTA NAD VŠÍM */
-    z-index: 999999999 !important;
-}
-
-.bossInfoTooltip.show {
-    opacity: 1;
-    transform: translateY(0);
+.boss-table.show {
+  display: block;
 }
