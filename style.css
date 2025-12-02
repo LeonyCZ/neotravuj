@@ -538,9 +538,8 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 14px;
-  min-width: 120px;
-  min-height: 40px;
+  padding: 4px 14px;  /* menší vertikální padding, aby byla výška menší */
+  height: 25px;        /* zmenšená výška */
   background: linear-gradient(145deg, #2e323c, #383d47);
   color: #facc15;
   font-weight: 700;
@@ -550,8 +549,10 @@ header {
   transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.3s ease;
   user-select: none;
   text-align: center;
-  width: 100%;
 }
+ext-align: center;
+}
+
 
 .boss-btn:hover {
   transform: translateY(-3px);
