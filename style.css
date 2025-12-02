@@ -538,21 +538,18 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 14px;  /* menší vertikální padding, aby byla výška menší */
-  height: 25px;        /* zmenšená výška */
+  padding: 4px 14px;        /* menší vertikální padding */
+  height: 25px;             /* zmenšená výška */
   background: linear-gradient(145deg, #2e323c, #383d47);
   color: #facc15;
   font-weight: 700;
-  border-radius: 12px;
+  border-radius: 9px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.3s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.3s ease; /* animace zachována */
   user-select: none;
   text-align: center;
 }
-ext-align: center;
-}
-
 
 .boss-btn:hover {
   transform: translateY(-3px);
