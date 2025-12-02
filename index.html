@@ -130,11 +130,12 @@
   <div class="boss-body"></div>
   <div id="bossTable" class="boss-table"></div>
 </div>
-
 <div class="wrap" id="mapWrap">
   <header>
-    <h2>Mapa</h2>
-    <button class="btn" id="clearDotsBtn">Smazat všechny puntíky</button>
+    <div class="map-buttons">
+      <button class="btn" id="clearDotsBtn">Smazat všechny puntíky</button>
+      <button class="btn" id="addMapBtn">Přidat mapu</button>
+    </div>
   </header>
 
   <main>
@@ -142,9 +143,7 @@
     <ul id="dotLog"></ul>
     <input type="file" id="mapInput" accept="image/*" style="display:none;">
   </main>
-    <button class="btn" id="addMapBtn">Přidat mapu</button>
 </div>
-
   </div>
 
   <script type="module" src="app.js"></script>

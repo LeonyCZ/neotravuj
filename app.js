@@ -222,10 +222,16 @@ function initMap(){
 
   // Načtení uložené mapy
   onValue(mapRef, snap=>{
-    const url = snap.val();
-    if(url) mapBox.innerHTML = `<img src="${url}" alt="Mapa">`;
-    else mapBox.innerHTML = "Klikni pro přidání puntíku";
-  });
+  const url = snap.val();
+  if(url) {
+    mapBox.style.backgroundImage = `url(${url})`;
+    mapBox.textContent = ""; // smaže případný text "Klikni..."
+  } else {
+    mapBox.style.backgroundImage = "none";
+    mapBox.textContent = "Klikni pro přidání puntíku";
+  }
+});
+
 
   // Kliknutí na tlačítko "Přidat mapu" → otevře file input
   addMapBtn.addEventListener("click", () => {
