@@ -145,7 +145,7 @@ function formatNumber(n){
 
 // ===== Úkolníček =====
 function initLevelSections(){
- const levels = ["level0_75","level75_90","level90_105","level105","level120"];
+ const levels = ["level0_75","level75_90","level90_105","level105","level120","level120_new"];
   levels.forEach(lvl=>{
     const section = document.getElementById(lvl);
     const input = section.querySelector(".taskInput");
@@ -323,10 +323,10 @@ function initBossBanner() {
 
   const bossInfo = {
     "Ledová čarodějnice": "Jeskyně vyhnanství, DMG: 100.000,-",
-    "Král Wubba": "Beta Mapa levý horní roh, DMG: XXX",
+    "Král Wubba": "Beta Mapa levý horní roh, DMG: 100.000,-",
     "Vládce En-Tai": "Zakletý les horní pravý roh, DMG: XXX",
     "Hadí královna Nethis": "Hadí chrám levý spodní roh, DMG: XXX",
-    "BO: Vládce En-Tai": "Zakletý les spodní pravý roh, DMG: XXX",
+    "BO: Vládce En-Tai": "Zakletý les spodní pravý roh, DMG: 150.000,-",
     "ČT: Bagjanamu": "Zakletý les vlevo uprostřed, DMG: XXX",
     "Naga Serpent": "Hadí chrám pravý horní roh, DMG: XXX"
   };
